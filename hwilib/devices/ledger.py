@@ -82,7 +82,7 @@ class LedgerClient(HardwareWalletClient):
     # Must return a dict with the xpub
     # Retrieves the public key at the specified BIP 32 derivation path
     @ledger_exception
-    def get_pubkey_at_path(self, path, prefix=None):
+    def get_pubkey_at_path(self, path, as_slip132=False, force_prefix=None):
         if not check_keypath(path):
             raise BadArgumentError("Invalid keypath")
         path = path[2:]
@@ -119,19 +119,20 @@ class LedgerClient(HardwareWalletClient):
         depth = struct.pack("B", depth)
 
         version = None
-        if prefix and prefix in self.XPUB_PREFIXES.keys():
-            if self.XPUB_PREFIXES.get(prefix).get('derivation_path'):
-                raise BadArgumentError("Can't override the prefix for this derivation path")
-            version = bytearray.fromhex(self.XPUB_PREFIXES.get(prefix).get('version_bytes'))
-        else:
-            for prefix in self.XPUB_PREFIXES.keys():
-                if (self.XPUB_PREFIXES[prefix]['derivation_path'] and 
-                        path.startswith(self.XPUB_PREFIXES[prefix]['derivation_path'][2:])):
-                    version = bytearray.fromhex(self.XPUB_PREFIXES[prefix]['version_bytes'])
-                    break
+        if as_slip132:
+            if force_prefix and force_prefix in self.XPUB_PREFIXES.keys():
+                # Apply the given prefix regardless of derivation path
+                version = bytearray.fromhex(self.XPUB_PREFIXES.get(force_prefix).get('version_bytes'))
+            else:
+                # Find the prefix for the derivation path
+                for prefix in self.XPUB_PREFIXES.keys():
+                    if (self.XPUB_PREFIXES[prefix]['derivation_path'] and 
+                            path.startswith(self.XPUB_PREFIXES[prefix]['derivation_path'][2:])):
+                        version = bytearray.fromhex(self.XPUB_PREFIXES[prefix]['version_bytes'])
+                        break
 
         if not version:
-            # Fall back to tpub/xpub if unrecognized derivation path
+            # Fall back to tpub/xpub
             if self.is_testnet or path.split("/")[1] == "1'":
                 version = bytearray.fromhex("043587CF")
             else:

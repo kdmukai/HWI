@@ -1,6 +1,8 @@
 # This is an abstract class that defines all of the methods that each Hardware
 # wallet subclass must implement.
 class HardwareWalletClient(object):
+
+    # Prefixes as defined in SLIP-0132
     XPUB_PREFIXES = {
         # mainnet
         'xpub': {'derivation_path': "m/44'/0'", 'version_bytes': '0488b21e'},  # P2PKH or P2SH
@@ -32,7 +34,7 @@ class HardwareWalletClient(object):
 
     # Must return a dict with the xpub
     # Retrieves the public key at the specified BIP 32 derivation path
-    def get_pubkey_at_path(self, path, prefix=None):
+    def get_pubkey_at_path(self, path, as_slip132=False, force_prefix=None):
         raise NotImplementedError('The HardwareWalletClient base class does not '
                                   'implement this method')
 

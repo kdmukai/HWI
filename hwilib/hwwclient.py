@@ -1,6 +1,21 @@
 # This is an abstract class that defines all of the methods that each Hardware
 # wallet subclass must implement.
 class HardwareWalletClient(object):
+    XPUB_PREFIXES = {
+        # mainnet
+        'xpub': {'derivation_path': "m/44'/0'", 'version_bytes': '0488b21e'},  # P2PKH or P2SH
+        'ypub': {'derivation_path': "m/49'/0'", 'version_bytes': '049d7cb2'},  # P2WPKH in P2SH
+        'zpub': {'derivation_path': "m/84'/0'", 'version_bytes': '04b24746'},  # P2WPKH
+        'Ypub': {'derivation_path': None,       'version_bytes': '0295b43f'},  # Multi-signature P2WSH in P2SH
+        'Zpub': {'derivation_path': None,       'version_bytes': '02aa7ed3'},  # Multi-signature P2WSH
+
+        # testnet
+        'tpub': {'derivation_path': "m/44'/1'", 'version_bytes': '043587cf'},  # P2PKH or P2SH
+        'upub': {'derivation_path': "m/49'/1'", 'version_bytes': '044a5262'},  # P2WPKH in P2SH
+        'vpub': {'derivation_path': "m/84'/1'", 'version_bytes': '045f1cf6'},  # P2WPKH
+        'Upub': {'derivation_path': None,       'version_bytes': '024289ef'},  # Multi-signature P2WSH in P2SH
+        'Vpub': {'derivation_path': None,       'version_bytes': '02575483'},  # Multi-signature P2WSH
+    }
 
     # device is an HID device that has already been opened.
     def __init__(self, path, password):
@@ -17,7 +32,7 @@ class HardwareWalletClient(object):
 
     # Must return a dict with the xpub
     # Retrieves the public key at the specified BIP 32 derivation path
-    def get_pubkey_at_path(self, path):
+    def get_pubkey_at_path(self, path, prefix=None):
         raise NotImplementedError('The HardwareWalletClient base class does not '
                                   'implement this method')
 
